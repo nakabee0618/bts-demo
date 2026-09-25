@@ -7,7 +7,7 @@ from activity import log
 from auth import current_user, demo_login, login, logout
 from db import is_demo
 
-st.set_page_config(page_title="福利厚生アプリ", page_icon="🏨", layout="wide")
+st.set_page_config(page_title="福利厚生アプリ", page_icon=":material/beach_access:", layout="wide")
 
 user = current_user()
 with st.sidebar:
