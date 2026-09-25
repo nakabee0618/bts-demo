@@ -97,3 +97,24 @@ def summary(posts: list[Post]) -> Summary:
     if not posts:
         return Summary(0, None)
     return Summary(len(posts), round(sum(p.rating for p in posts) / len(posts), 1))
+
+
+def rating_summary(menu_ids: list[str]) -> dict[str, tuple[int, float]]:
+    """メニューごとの口コミ件数と平均。一覧の表示と評価順の並び替えに使う。"""
+    if not menu_ids:
+        return {}
+    rows = table("posts").select("menu_id, rating").in_("menu_id", menu_ids).eq("hidden", False).is_("deleted_at", "null").execute().data
+    acc: dict[str, list[int]] = {}
+    for r in rows:
+        acc.setdefault(r["menu_id"], []).append(int(r["rating"]))
+    return {k: (len(v), round(sum(v) / len(v), 1)) for k, v in acc.items()}
+
+
+def recent_posts(tenant_id: str, limit: int = 3) -> list[dict]:
+    """最近の口コミ（施設名つき）。検索前の画面に出す。"""
+    rows = table("posts").select("*, users(name)").eq("tenant_id", tenant_id).eq("hidden", False).is_("deleted_at", "null").order("created_at", desc=True).limit(limit).execute().data
+    ids = list({r["menu_id"] for r in rows})
+    names = {m["id"]: m["name"] for m in table("menus").select("id,name").in_("id", ids).execute().data} if ids else {}
+    for r in rows:
+        r["menu_name"] = names.get(r["menu_id"], "")
+    return rows

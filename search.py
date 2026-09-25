@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import date
 from typing import Optional
 
 from db import table
@@ -87,54 +87,3 @@ def get_menu(menu_id: str) -> Optional[Menu]:
     m = Menu.from_row(rows[0])
     m.plans = [Plan.from_row(r) for r in table("plans").select("*").eq("menu_id", menu_id).is_("deleted_at", "null").order("benefit_price").execute().data]
     return m
-
-
-NEW_DAYS = 14
-
-
-def is_new(content_updated_at: Optional[str]) -> bool:
-    """内容の更新日が NEW_DAYS 日以内なら新着。"""
-    if not content_updated_at:
-        return False
-    return date.fromisoformat(str(content_updated_at)[:10]) >= date.today() - timedelta(days=NEW_DAYS)
-
-
-def spots_by_area(area_id: Optional[str]) -> list[dict]:
-    """エリアの周辺情報（食事・レジャー）。共通＋自テナントのもの。"""
-    if not area_id:
-        return []
-    return table("spots").select("*").eq("area_id", area_id).order("kind").execute().data
-
-
-def rating_summary(menu_ids: list[str]) -> dict[str, tuple[int, float]]:
-    """メニューごとの口コミ件数と平均。並び替え（評価順）と一覧表示に使う。"""
-    if not menu_ids:
-        return {}
-    rows = table("posts").select("menu_id, rating").in_("menu_id", menu_ids).eq("hidden", False).is_("deleted_at", "null").execute().data
-    acc: dict[str, list[int]] = {}
-    for r in rows:
-        acc.setdefault(r["menu_id"], []).append(int(r["rating"]))
-    return {k: (len(v), round(sum(v) / len(v), 1)) for k, v in acc.items()}
-
-
-def all_stay_menus(tenant_id: str) -> list[Menu]:
-    """ランキング用: 宿泊メニュー全件（プラン付き）。"""
-    return search(tenant_id, Condition(None, "stay", None, 2, None))
-
-
-def recent_posts(tenant_id: str, limit: int = 3) -> list[dict]:
-    """最近の口コミ（施設名つき）。"""
-    rows = table("posts").select("*, users(name)").eq("tenant_id", tenant_id).eq("hidden", False).is_("deleted_at", "null").order("created_at", desc=True).limit(limit).execute().data
-    ids = list({r["menu_id"] for r in rows})
-    names = {m["id"]: m["name"] for m in table("menus").select("id,name").in_("menu_id" if False else "id", ids).execute().data} if ids else {}
-    for r in rows:
-        r["menu_name"] = names.get(r["menu_id"], "")
-    return rows
-
-
-def monthly_usage(tenant_id: str) -> dict[str, int]:
-    """今月のクーポン利用数と口コミ数。"""
-    start = date.today().replace(day=1).isoformat()
-    coupons = table("activity_logs").select("id, occurred_at").eq("tenant_id", tenant_id).eq("kind", "coupon").execute().data
-    posts = table("posts").select("id, created_at").eq("tenant_id", tenant_id).is_("deleted_at", "null").execute().data
-    return {"coupons": sum(1 for r in coupons if str(r["occurred_at"])[:10] >= start), "posts": sum(1 for r in posts if str(r["created_at"])[:10] >= start)}

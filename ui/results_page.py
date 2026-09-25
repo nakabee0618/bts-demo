@@ -1,4 +1,4 @@
-"""候補一覧（一覧モジュール）。お得な順に並べ、カードで価格と判定を表示する。並び替えは お得順／価格順／評価順。"""
+"""候補一覧（差額計算・ランキング表示モジュール）。お得な順に並べ、カードで価格と判定を表示する。並び替えは お得順／価格順／評価順。"""
 from __future__ import annotations
 
 import streamlit as st
@@ -6,7 +6,9 @@ import streamlit as st
 from models import CATEGORIES, Menu
 from placeholder import image_url
 from pricing import PriceResult, best_result
-from search import Condition, is_new, rating_summary, representative_prices
+from posts import rating_summary
+from ranking import is_new
+from search import Condition, representative_prices
 
 SORTS = {"お得順": "diff", "価格が安い順": "price", "評価が高い順": "rating"}
 
