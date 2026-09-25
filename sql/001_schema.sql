@@ -80,7 +80,6 @@ create table if not exists bts.plans (
   list_price int not null,
   benefit_price int not null,
   coupon_code text,
-  coupon_price int,
   member_url text,
   child_pricing text,
   peak_note text,

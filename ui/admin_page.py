@@ -16,10 +16,10 @@ def render() -> None:
     tab_menu, tab_usage, tab_notify = st.tabs(["メニュー管理", "利用の記録（開発予定）", "社内ツール連携（開発予定）"])
     with tab_usage:
         # 見た目のみ（第6回決定）。集計はMVP後に実装する
-        st.caption("クーポン取得数・会員用ページへのリンクのクリック数・ログイン数を期間で集計します。MVPでは見た目のみです")
+        st.caption("クーポン使用数・予約ページを開いた数・ログイン数を期間で集計します。MVPでは見た目のみです")
         c1, c2, c3 = st.columns(3)
-        c1.metric("クーポン取得", "—")
-        c2.metric("リンククリック", "—")
+        c1.metric("クーポン使用", "—")
+        c2.metric("予約ページを開いた数", "—")
         c3.metric("ログイン", "—")
         st.date_input("期間", value=(), disabled=True)
     with tab_notify:
@@ -36,7 +36,7 @@ def _render_menus(user) -> None:
     # ① 自テナントのメニューを取る
     rows = table("menus").select("*").eq("tenant_id", user.tenant_id).is_("deleted_at", "null").order("name").execute().data
     menus = [Menu.from_row(r) for r in rows]
-    st.caption(f"{len(menus)}件。CSVからの投入は `python -m seed.load` で行います。")
+    st.caption(f"{len(menus)}件。一括登録は運用担当が行います。")
     names = {m.name: m for m in menus}
     # ② 未選択なら一覧、選択されたら編集フォーム
     picked = st.selectbox("編集するメニュー", ["（選択）"] + list(names))
@@ -46,7 +46,7 @@ def _render_menus(user) -> None:
     m = names[picked]
     with st.form("edit"):
         name = st.text_input("施設名", m.name)
-        hotel_ref = st.text_input("実勢価格取得元の宿ID（楽天のホテル番号）", m.hotel_ref or "")
+        hotel_ref = st.text_input("楽天トラベルのホテル番号", m.hotel_ref or "")
         usage_limit = st.text_input("利用回数の上限", m.usage_limit or "")
         family_scope = st.text_input("家族の範囲", m.family_scope or "")
         cancel_policy = st.text_input("キャンセル条件", m.cancel_policy or "")

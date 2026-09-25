@@ -33,14 +33,14 @@ def _load() -> None:
             menus.append({"id": mid, "tenant_id": tenant["id"], "name": r["name"], "category": r["category"], "area_id": area_by.get(r["area_code"]),
                           "address": r["address"], "description": r["description"], "procedure": None, "usage_limit": r["usage_limit"], "family_scope": r["family_scope"],
                           "cancel_policy": r["cancel_policy"], "max_people": None, "visibility": "internal", "hotel_ref": r["hotel_ref"] or None, "matched": bool(r["hotel_ref"]),
-                          "content_updated_at": r["content_updated_at"], "deleted_at": None, "created_at": _now(), "updated_at": _now()})
+                          "content_updated_at": (date.today() - __import__("datetime").timedelta(days=int(r["content_updated_at"][-2:]) % 30)).isoformat(), "deleted_at": None, "created_at": _now(), "updated_at": _now()})
     _STORE["menus"] = menus
     plans = []
     with open(ROOT / "seed" / "plans.csv", newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             plans.append({"id": str(uuid.uuid4()), "menu_id": key_to_id[r["menu_key"]], "name": r["name"], "room_type": r["room_type"] or None, "meal": r["meal"] or None,
                           "grade": r["grade"] or None, "adults": int(r["adults"]), "children": int(r["children"]), "nights": int(r["nights"]), "list_price": int(r["list_price"]),
-                          "benefit_price": int(r["benefit_price"]), "coupon_code": r["coupon_code"] or None, "coupon_price": int(r["coupon_price"]) if r["coupon_price"] else None,
+                          "benefit_price": int(r["benefit_price"]), "coupon_code": r["coupon_code"] or None,
                           "member_url": r["member_url"] or None, "deleted_at": None})
     _STORE["plans"] = plans
     users = []
@@ -64,6 +64,11 @@ def _load() -> None:
         _STORE["posts"].append({"id": str(uuid.uuid4()), "tenant_id": tenant["id"], "user_id": users[u]["id"], "menu_id": m["id"], "plan_id": None, "used_at": None, "rating": rating,
                                 "comment": c, "photo_url": None, "sentiment": None, "anonymous": False, "external_ok": False, "public_selected": False, "hidden": False, "view_count": 0,
                                 "deleted_at": None, "created_at": _now()})
+    spots = []
+    with open(ROOT / "seed" / "spots.csv", newline="", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            spots.append({"id": str(uuid.uuid4()), "tenant_id": None, "area_id": area_by.get(r["area_code"]), "kind": r["kind"], "name": r["name"], "description": r["description"], "url": r["url"], "source": "seed", "fetched_at": _now()})
+    _STORE["spots"] = spots
     _STORE["activity_logs"] = []
     _STORE["fetch_logs"] = []
     _STORE["spend"] = []
@@ -99,7 +104,11 @@ class _Query:
     def execute(self):
         rows = _STORE.setdefault(self.name, [])
         if self._op == "insert":
-            row = dict(self._payload); row.setdefault("id", str(uuid.uuid4())); row.setdefault("created_at", _now()); rows.append(row)
+            row = dict(self._payload); row.setdefault("id", str(uuid.uuid4())); row.setdefault("created_at", _now())
+            # DBの既定値（default）に合わせる
+            if self.name == "posts":
+                row.setdefault("hidden", False); row.setdefault("deleted_at", None)
+            rows.append(row)
             return _Result([row])
         if self._op == "update":
             out = [r for r in rows if self._match(r)]

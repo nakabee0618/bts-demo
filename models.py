@@ -8,7 +8,7 @@ from typing import Any, Optional
 # 種別の固定値（DBの説明列と揃える）
 CATEGORIES = {"stay": "宿泊", "meal": "食事", "leisure": "レジャー"}
 ROLES = {"employee": "従業員", "hr": "人事", "executive": "経営"}
-ACTIVITY_KINDS = {"login": "ログイン", "coupon": "クーポン取得", "click": "会員用ページへのリンククリック"}
+ACTIVITY_KINDS = {"login": "ログイン", "coupon": "クーポン使用", "click": "予約ページを開いた"}
 
 
 @dataclass
@@ -52,7 +52,6 @@ class Plan:
     meal: Optional[str] = None
     grade: Optional[str] = None
     coupon_code: Optional[str] = None
-    coupon_price: Optional[int] = None
     member_url: Optional[str] = None
 
     @classmethod
@@ -62,7 +61,7 @@ class Plan:
             list_price=int(r["list_price"]), benefit_price=int(r["benefit_price"]),
             nights=int(r.get("nights") or 1), adults=r.get("adults"), children=r.get("children"),
             room_type=r.get("room_type"), meal=r.get("meal"), grade=r.get("grade"),
-            coupon_code=r.get("coupon_code"), coupon_price=r.get("coupon_price"), member_url=r.get("member_url"),
+            coupon_code=r.get("coupon_code"), member_url=r.get("member_url"),
         )
 
 
@@ -83,6 +82,7 @@ class Menu:
     hotel_ref: Optional[str] = None
     matched: bool = False
     photo_url: Optional[str] = None
+    content_updated_at: Optional[str] = None
     plans: list[Plan] = field(default_factory=list)
 
     @classmethod
@@ -92,7 +92,7 @@ class Menu:
             area_id=r.get("area_id"), address=r.get("address"), description=r.get("description"),
             procedure=r.get("procedure"), usage_limit=r.get("usage_limit"), family_scope=r.get("family_scope"),
             cancel_policy=r.get("cancel_policy"), max_people=r.get("max_people"),
-            hotel_ref=r.get("hotel_ref"), matched=bool(r.get("matched", False)), photo_url=r.get("photo_url"),
+            hotel_ref=r.get("hotel_ref"), matched=bool(r.get("matched", False)), photo_url=r.get("photo_url"), content_updated_at=r.get("content_updated_at"),
         )
 
 
@@ -128,6 +128,7 @@ class Post:
     comment: Optional[str]
     created_at: datetime
     user_name: str = ""
+    photo_url: Optional[str] = None
 
     @classmethod
     def from_row(cls, r: dict[str, Any]) -> "Post":
@@ -135,4 +136,5 @@ class Post:
             id=r["id"], menu_id=r["menu_id"], user_id=r["user_id"], rating=int(r["rating"]),
             comment=r.get("comment"), created_at=datetime.fromisoformat(str(r["created_at"]).replace("Z", "+00:00")),
             user_name=(r.get("users") or {}).get("name", "") if isinstance(r.get("users"), dict) else "",
+            photo_url=r.get("photo_url"),
         )

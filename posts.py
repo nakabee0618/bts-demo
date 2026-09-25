@@ -1,25 +1,52 @@
 """投稿と社員の声（D3）。星と一言を保存し、メニューごとの一覧と要約を返す。"""
 from __future__ import annotations
 
+import base64
+import uuid
 from dataclasses import dataclass
 from typing import Optional
 
-from db import table
+from db import client, is_demo, table
 from models import Post, User
 
 COMMENT_MAX = 200
+PHOTO_TYPES = ("image/jpeg", "image/png")
+PHOTO_MAX_BYTES = 5 * 1024 * 1024
+PHOTO_BUCKET = "post-photos"
 
 
 def validate(rating: int, comment: str) -> Optional[str]:
     """入力の検証。問題があれば理由の文字列、なければ None。"""
     if not 1 <= int(rating) <= 5:
-        return "星は1〜5で選んでください"
+        return "星を選んでください"
     if len(comment or "") > COMMENT_MAX:
-        return f"一言は{COMMENT_MAX}文字以内にしてください"
+        return f"コメントは{COMMENT_MAX}文字までにしてください"
     return None
 
 
-def create(user: User, menu_id: str, rating: int, comment: str, plan_id: Optional[str] = None) -> Optional[str]:
+def validate_photo(content_type: str, size: int) -> Optional[str]:
+    """写真の検証。形式は JPEG / PNG、大きさは 5MB まで。"""
+    if content_type not in PHOTO_TYPES:
+        return "写真は JPEG か PNG にしてください"
+    if size > PHOTO_MAX_BYTES:
+        return "写真は 5MB までにしてください"
+    return None
+
+
+def upload_photo(user: User, data: bytes, content_type: str) -> str:
+    """写真を保存してURLを返す。デモでは data URL、本番は Supabase Storage（公開バケット post-photos）。"""
+    # ① デモモードはメモリ上に持つだけ（data URL）
+    if is_demo():
+        return f"data:{content_type};base64," + base64.b64encode(data).decode("ascii")
+    # ② 本番はテナント・利用者ごとのフォルダに一意な名前で置く
+    ext = "png" if content_type == "image/png" else "jpg"
+    path = f"{user.tenant_id}/{user.id}/{uuid.uuid4().hex}.{ext}"
+    storage = client().storage.from_(PHOTO_BUCKET)
+    storage.upload(path, data, {"content-type": content_type})
+    return storage.get_public_url(path)
+
+
+def create(user: User, menu_id: str, rating: int, comment: str, plan_id: Optional[str] = None, photo_url: Optional[str] = None) -> Optional[str]:
     """投稿を保存する。失敗時はエラー文字列。"""
     # ① 入力を検証する
     err = validate(rating, comment)
@@ -33,6 +60,7 @@ def create(user: User, menu_id: str, rating: int, comment: str, plan_id: Optiona
         "plan_id": plan_id,
         "rating": int(rating),
         "comment": (comment or "").strip() or None,
+        "photo_url": photo_url,
     }
     # ③ 保存する。失敗は文字列で返す
     try:

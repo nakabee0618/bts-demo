@@ -98,7 +98,7 @@ def load_plans(c, key_to_id: dict[str, str]) -> None:
         if not menu_id:
             continue
         row["menu_id"] = menu_id
-        for k in ("adults", "children", "nights", "list_price", "benefit_price", "coupon_price"):
+        for k in ("adults", "children", "nights", "list_price", "benefit_price"):
             if row.get(k) is not None:
                 row[k] = int(row[k])
         # ③ プラン名で既存を探して更新か追加

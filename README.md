@@ -1,4 +1,4 @@
-# 福利厚生アプリ MVP（参照用の完成版）
+# 福利厚生検索アプリ MVP（参照用の完成版）
 
 Streamlit + Supabase（スキーマ bts）。9モジュール構成。
 
@@ -13,11 +13,12 @@ Streamlit + Supabase（スキーマ bts）。9モジュール構成。
 
 1. Supabase で `sql/001_schema.sql` → `sql/002_seed_tenant.sql` を実行。ダッシュボードの API 設定で Exposed schemas に `bts` を追加
 2. Supabase Auth で利用者アカウントを作る（seed/users.csv のメール）。作成後、`bts.users.auth_id` に Auth の user id を入れる
-3. `.streamlit/secrets.toml.example` を `secrets.toml` にコピーして値を入れる
-4. `pip install -r requirements.txt`（Windowsで複数版がある場合は `py -3.12 -m venv .venv` で仮想環境を作る）
-5. `python -m seed.load`（メニュー・プラン・利用者・支出額を投入）
-6. `python -m prices.update`（実勢価格を取得。楽天のアプリIDが空ならダミー価格）
-7. `streamlit run app.py`
+3. Storage に公開バケット `post-photos` を作る（口コミの写真用）
+4. `.streamlit/secrets.toml.example` を `secrets.toml` にコピーして値を入れる
+5. `pip install -r requirements.txt`（Windowsで複数版がある場合は `py -3.12 -m venv .venv` で仮想環境を作る）
+6. `python -m seed.load`（メニュー・プラン・利用者・支出額を投入）
+7. `python -m prices.update`（一般サイトの価格を取得。楽天のアプリIDが空ならダミー価格）
+8. `streamlit run app.py`
 
 ## 構成
 | モジュール | ファイル |

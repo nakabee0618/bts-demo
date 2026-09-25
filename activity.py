@@ -1,4 +1,4 @@
-"""行動ログ（ログイン・クーポン取得・会員用ページへのリンククリック）の記録。"""
+"""行動ログ（ログイン・クーポン使用・予約ページを開いた）の記録。"""
 from __future__ import annotations
 
 from datetime import datetime, timezone

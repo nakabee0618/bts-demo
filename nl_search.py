@@ -29,7 +29,7 @@ class Parsed:
     source: str = "rule"
 
     def as_dict(self) -> dict:
-        return {"エリア": self.area_name, "カテゴリ": self.category, "人数": self.adults, "予算": self.budget, "日程": self.checkin.isoformat() if self.checkin else None, "キーワード": self.keywords, "変換": "AI" if self.source == "llm" else "ルール"}
+        return {"エリア": self.area_name, "カテゴリ": {"stay": "宿泊", "meal": "食事", "leisure": "レジャー"}.get(self.category), "人数": self.adults, "予算": self.budget, "日程": self.checkin.isoformat() if self.checkin else None, "キーワード": self.keywords, "変換": "AI" if self.source == "llm" else "ルール"}
 
 
 def parse(text: str, area_names: list[str]) -> Parsed:
