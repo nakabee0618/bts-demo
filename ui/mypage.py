@@ -11,7 +11,7 @@ from models import Plan
 def render() -> None:
     """自分の行動ログ（クーポン）から、施設名・プラン名・コードを新しい順に出す。"""
     user = require_login()
-    st.subheader("クーポン使用履歴")
+    st.subheader(":material/confirmation_number: クーポン使用履歴")
     logs = table("activity_logs").select("*").eq("user_id", user.id).eq("kind", "coupon").order("occurred_at", desc=True).execute().data
     if not logs:
         st.info("まだクーポンを使っていません。施設の詳細から「クーポンを使う」を押すとここに残ります。")
@@ -32,4 +32,4 @@ def render() -> None:
             if p and p.coupon_code:
                 st.code(p.coupon_code, language=None)
             if p and p.member_url:
-                st.link_button("予約ページを開く", p.member_url)
+                st.link_button("予約ページを開く", p.member_url, icon=":material/open_in_new:")

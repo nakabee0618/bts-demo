@@ -15,7 +15,7 @@ def render_review_tab(user: User, menu: Menu) -> None:
     s = summary(posts)
     c1, c2 = st.columns([3, 1])
     c1.write(f"{s.count}件" + (f"　平均 ★{s.average}" if s.average else ""))
-    if c2.button("口コミを書く"):
+    if c2.button("口コミを書く", icon=":material/rate_review:"):
         open_post_dialog(user, menu, None)
     # ② 空状態
     if not posts:

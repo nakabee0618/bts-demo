@@ -13,7 +13,7 @@ def render() -> None:
 
     """メニュー管理画面。一覧と、選んだ1件の編集フォーム。"""
     user = require_role("hr", "executive")
-    tab_menu, tab_usage, tab_notify = st.tabs(["メニュー管理", "利用の記録（開発予定）", "社内ツール連携（開発予定）"])
+    tab_menu, tab_usage, tab_notify = st.tabs([":material/edit_note: メニュー管理", ":material/bar_chart: 利用の記録（開発予定）", ":material/notifications: 社内ツール連携（開発予定）"])
     with tab_usage:
         # 見た目のみ（第6回決定）。集計はMVP後に実装する
         st.caption("クーポン使用数・予約ページを開いた数・ログイン数を期間で集計します。MVPでは見た目のみです")

@@ -14,7 +14,7 @@ def render_spots_tab(menu: Menu) -> None:
     if not spots:
         st.info("周辺の情報はまだありません。")
     # ② 食事・レジャーに分けてリンク付きで並べる
-    for kind, label in (("meal", "食事"), ("leisure", "レジャー")):
+    for kind, label in (("meal", ":material/restaurant: 食事"), ("leisure", ":material/attractions: レジャー")):
         items = [sp for sp in spots if sp["kind"] == kind]
         if items:
             st.markdown(f"**{label}**")

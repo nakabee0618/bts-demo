@@ -42,16 +42,17 @@ def render_results(menus: list[Menu], cond: Condition) -> None:
         with st.container(border=True):
             c0, c1, c2 = st.columns([1, 3, 1])
             c0.image(image_url(m.photo_url, m.name, m.category, width=200, height=120), use_container_width=True)
+            cat_icon = {"stay": ":material/bed:", "meal": ":material/restaurant:", "leisure": ":material/attractions:"}.get(m.category, "")
             cat_color = {"stay": "violet", "meal": "orange", "leisure": "green"}.get(m.category, "gray")
-            badges = f":{cat_color}-badge[{CATEGORIES.get(m.category, m.category)}]"
+            badges = f":{cat_color}-badge[{cat_icon} {CATEGORIES.get(m.category, m.category)}]"
             if is_new(m.content_updated_at):
-                badges += " :red-badge[新着]"
+                badges += " :red-badge[:material/fiber_new: 新着]"
             if r is not None and r.market_price is not None and r.diff <= 0:
                 badges += " :red-badge[一般サイトの方が安い]"
             elif r is not None and r.market_price is None:
                 badges += " :gray-badge[一般サイトの価格なし]"
             if any(p.coupon_code for p in m.plans):
-                badges += " :blue-badge[クーポンあり]"
+                badges += " :blue-badge[:material/confirmation_number: クーポンあり]"
             cnt, avg = ratings.get(m.id, (0, None))
             c1.markdown(f"#### {m.name}")
             c1.markdown(badges + (f"　★{avg}（{cnt}件）" if cnt else ""))
@@ -64,7 +65,7 @@ def render_results(menus: list[Menu], cond: Condition) -> None:
             else:
                 cheapest = min(m.plans, key=lambda p: p.benefit_price)
                 c1.markdown(f"福利厚生 **{cheapest.benefit_price:,}円〜**")
-            if c2.button("詳細を見る", key=f"detail-{m.id}"):
+            if c2.button("詳細を見る", key=f"detail-{m.id}", icon=":material/arrow_forward:"):
                 st.session_state["menu_id"] = m.id
                 st.session_state["page"] = "detail"
                 st.rerun()

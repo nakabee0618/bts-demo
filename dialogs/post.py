@@ -19,7 +19,7 @@ def open_post_dialog(user: User, menu: Menu, plan: Optional[Plan]) -> None:
     photo = st.file_uploader("写真（任意・JPEG／PNG・5MBまで）", type=["jpg", "jpeg", "png"])
     st.caption("個人が特定される内容や、契約の詳細は書かないでください。人の顔が写った写真は避けてください。")
     # ② 送信で検証と保存。写真があれば先に保存してURLを得る。星は +1 して保存
-    if st.button("投稿する", type="primary"):
+    if st.button("投稿する", type="primary", icon=":material/send:"):
         if rating is None:
             st.error("星を選んでください"); return
         photo_url = None

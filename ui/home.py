@@ -13,7 +13,7 @@ def render_home(user: User) -> None:
     """検索フォームの下に出す。検索したら消える。件数が少なくても見劣りしないよう、数の集計は出さない。"""
     # ① お得ランキング（宿泊の差額トップ5）。セクションごとに区切り線と見出しを置く
     st.divider()
-    st.subheader("お得ランキング")
+    st.subheader(":material/trophy: お得ランキング")
     st.caption("一般サイトより安く泊まれる宿の上位5件")
     cols = st.columns(5)
     for i, (m, r) in enumerate(top_deals(user.tenant_id, 5)):
@@ -28,7 +28,7 @@ def render_home(user: User) -> None:
     new = new_menus(user.tenant_id, 5)
     if new:
         st.divider()
-        st.subheader("新着")
+        st.subheader(":material/fiber_new: 新着")
         st.caption("最近追加・更新された宿")
         cols = st.columns(5)
         for i, m in enumerate(new):
@@ -43,7 +43,7 @@ def render_home(user: User) -> None:
     posts = recent_posts(user.tenant_id, 3)
     if posts:
         st.divider()
-        st.subheader("最近の口コミ")
+        st.subheader(":material/reviews: 最近の口コミ")
         st.caption("社員が最近書いた口コミ")
         for p in posts:
             with st.container(border=True):

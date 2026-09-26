@@ -18,14 +18,14 @@ def render() -> None:
     areas = list_areas()
     # ① 検索の入口を枠で囲む（文章で探す／条件で探す）
     with st.container(border=True):
-        st.subheader("検索")
-        nl_tab, form_tab = st.tabs(["文章で探す", "条件で探す"])
+        st.subheader(":material/search: 検索")
+        nl_tab, form_tab = st.tabs([":material/chat: 文章で探す", ":material/tune: 条件で探す"])
         defaults = {"area": "すべて", "category": "すべて", "checkin": date.today() + timedelta(days=14), "adults": 2, "budget": 0}
         with nl_tab:
             if is_demo():
                 st.info("お試し版のため、文章の読み取りは簡易です")
             text = st.text_input("どんな休日にしたいですか", placeholder="例: 来週末に箱根で2人、3万円以内で温泉に泊まりたい")
-            if st.button("検索", key="nl-search", type="primary") and text.strip():
+            if st.button("検索", key="nl-search", type="primary", icon=":material/search:") and text.strip():
                 # ② 文章を条件に読み替え、そのまま検索まで行う
                 parsed = parse(text, [a.name for a in areas])
                 st.session_state["nl_parsed"] = parsed
@@ -60,7 +60,7 @@ def render() -> None:
             checkin = c3.date_input("宿泊日", value=defaults["checkin"])
             adults = c4.number_input("人数", min_value=1, max_value=10, value=int(defaults["adults"]))
             budget = c5.number_input("予算（円・0なら上限なし）", min_value=0, value=int(defaults["budget"]), step=1000)
-            if st.form_submit_button("検索", type="primary"):
+            if st.form_submit_button("検索", type="primary", icon=":material/search:"):
                 # ③ 条件を組み立てて検証し、検索する
                 cond = Condition(
                     area_id=next((a.id for a in areas if a.name == area), None),
@@ -79,8 +79,8 @@ def render() -> None:
         render_home(user)
         return
     h1, h2 = st.columns([4, 1], vertical_alignment="center")
-    h1.subheader("検索結果")
-    if h2.button("← トップに戻る", use_container_width=True):
+    h1.subheader(":material/list: 検索結果")
+    if h2.button("トップに戻る", icon=":material/home:", use_container_width=True):
         for k in ("results", "condition", "nl_parsed"):
             st.session_state.pop(k, None)
         st.rerun()

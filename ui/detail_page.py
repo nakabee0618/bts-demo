@@ -22,18 +22,19 @@ def render() -> None:
         st.info("一覧から施設を選んでください。")
         return
     # ② 見出し（戻る・画像・施設名・バッジ・住所・説明）
-    if st.button("← 一覧に戻る"):
+    if st.button("一覧に戻る", icon=":material/arrow_back:"):
         st.session_state["page"] = "search"; st.rerun()
     h1, h2 = st.columns([1, 3])
     h1.image(image_url(menu.photo_url, menu.name, menu.category), use_container_width=True)
     h2.subheader(menu.name)
+    cat_icon = {"stay": ":material/bed:", "meal": ":material/restaurant:", "leisure": ":material/attractions:"}.get(menu.category, "")
     cat_color = {"stay": "violet", "meal": "orange", "leisure": "green"}.get(menu.category, "gray")
-    h2.markdown(f":{cat_color}-badge[{CATEGORIES.get(menu.category, menu.category)}]" + (" :blue-badge[クーポンあり]" if any(p.coupon_code for p in menu.plans) else ""))
+    h2.markdown(f":{cat_color}-badge[{cat_icon} {CATEGORIES.get(menu.category, menu.category)}]" + (" :blue-badge[:material/confirmation_number: クーポンあり]" if any(p.coupon_code for p in menu.plans) else ""))
     h2.caption(menu.address or "")
     if menu.description:
         h2.write(menu.description)
     # ③ 4タブ。中身はそれぞれの担当ファイルが描く
-    tab1, tab2, tab3, tab4 = st.tabs(["価格比較", "プラン・条件", "口コミ", "周辺"])
+    tab1, tab2, tab3, tab4 = st.tabs([":material/payments: 価格比較", ":material/bed: プラン・条件", ":material/reviews: 口コミ", ":material/map: 周辺"])
     with tab1:
         render_price_tab(user, menu)
     with tab2:
