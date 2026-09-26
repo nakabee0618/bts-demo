@@ -24,13 +24,21 @@ def render_home(user: User) -> None:
             if st.button("詳細を見る", key=f"rank-{m.id}", use_container_width=True):
                 st.session_state["menu_id"] = m.id; st.session_state["page"] = "detail"; st.rerun()
             st.caption(m.name)
-    # ② 新着メニュー
+    # ② 新着（ランキングと同じカードの形で、画像・最安の福利厚生価格・ボタン・施設名）
     new = new_menus(user.tenant_id, 5)
     if new:
         st.divider()
         st.subheader("新着")
         st.caption("最近追加・更新された宿")
-        st.write("　".join(f":red-badge[新着] {m.name}" for m in new))
+        cols = st.columns(5)
+        for i, m in enumerate(new):
+            with cols[i]:
+                st.image(image_url(m.photo_url, m.name, m.category, width=200, height=120), use_container_width=True)
+                cheapest = min(p.benefit_price for p in m.plans)
+                st.markdown(f":red-badge[新着]　**{cheapest:,}円〜**")
+                if st.button("詳細を見る", key=f"new-{m.id}", use_container_width=True):
+                    st.session_state["menu_id"] = m.id; st.session_state["page"] = "detail"; st.rerun()
+                st.caption(m.name)
     # ③ 最近の口コミ
     posts = recent_posts(user.tenant_id, 3)
     if posts:
